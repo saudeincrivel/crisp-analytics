@@ -25,9 +25,18 @@ class ConversationUtils:
         return None
 
     @staticmethod
+    def get_last_message_timestamp(chat_log) -> Any:
+        last_message_timestamp = None
+        for message in chat_log:
+            last_message_timestamp = message['timestamp']
+
+        return last_message_timestamp
+
+    @staticmethod
     def enrich_conversation(conversation, chat_log) -> Any:
         conversation_unix_start_time = conversation['created_at']
-        total_time_in_seconds = (conversation['active']['last'] - conversation_unix_start_time) / ONE_SECOND
+        last_message_timestamp = ConversationUtils.get_last_message_timestamp(chat_log)
+        total_time_in_seconds = (last_message_timestamp - conversation_unix_start_time) / ONE_SECOND
         response_delay = ConversationUtils.get_response_time_delay(chat_log)
 
         enriched_conversation = {

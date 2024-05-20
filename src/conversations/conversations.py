@@ -36,7 +36,7 @@ class ConversationsAPI:
 
                 try:
                     print(f'Request conversations ...')
-                    conversations = self.client.website.list_conversations(**params)
+                    conversations = self.client.website.search_conversations(**params)
                 except Exception as e:
                     print("Error occurred while fetching conversations:", e)
                     break
