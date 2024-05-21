@@ -1,0 +1,4 @@
+session_id,start_time,avg_response_time,total_time_in_seconds,number_of_messages
+session_f4a63aa0-b28f-4d95-a54c-5815b52a4ec5,1716210146967,5.35,16646.73,143
+session_70675d9f-b2b4-4aef-9f31-7cea8cfdd061,1715943095780,6.86,16.71,10
+session_ff448e24-0676-4838-a421-93b5880772e0,1715942265395,1.14,50.83,20
