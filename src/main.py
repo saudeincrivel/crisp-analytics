@@ -20,6 +20,7 @@ logging.basicConfig(
 )
 
 
+
 def run_script():
     print("Running program..")
     api = ConversationsAPI()
@@ -35,7 +36,6 @@ def run_script_with_filter(start_time, end_time):
     data = api.get_enriched_conversations(convert_to_iso(start_time), convert_to_iso(end_time))
     FileUtils.save_to_disk(data)
     print("Finished")
-
     pass
 
 
@@ -43,5 +43,5 @@ if __name__ == '__main__':
     # start_time = '20/04/2024'
     # end_time = '20/05/2024'
     # run_script_with_filter(start_time, end_time)
-
+    
     run_script()

@@ -71,20 +71,47 @@ class ConversationsAPI:
             raise
 
     def get_messages(self, session_id) -> Any:
+        complete_chat_log = []
+        my_timestamp = int(time.time()) * 1000
+
+        def fetch_messages(site_id, session_id, timestamp):
+            query = {
+                'timestamp_before': timestamp
+            }
+            try:
+                response = self.client.website.get_messages_in_conversation(site_id, session_id, query)
+            except Exception as e:
+                print(f'[Request error]:', e)
+
+            return response
+
         try:
-            chat_log = self.client.website.get_messages_in_conversation(self.site_id, session_id, {})
+            while True:
+                try:
+                    partial_chat_log = fetch_messages(self.site_id, session_id, my_timestamp)
 
-            if 'error' in chat_log:
-                logger.error(f"[API error] in get_messages : {chat_log['reason']}")
-                raise Exception(f"[API error]: {chat_log['reason']}")
+                    if not partial_chat_log:
+                        break
 
-            return chat_log
+                    my_timestamp = ConversationUtils.get_first_timestamp(partial_chat_log)
+
+                except Exception as e:
+                    print("Request error. while fetching messages: ", e)
+                    break
+
+                if 'error' in partial_chat_log:
+                    logger.error(f"[API error] in get_messages ")
+                    raise Exception(f"[API error]: {partial_chat_log['reason']}")
+
+                complete_chat_log.extend(partial_chat_log)
+            return complete_chat_log
+
         except requests.exceptions.RequestException as e:
-            logger.error("[Request Error] in get_messages")
+            logger.error("[API error] in partial_chat_log")
         pass
 
     def get_enriched_conversations(self, start_time=None, end_time=None) -> list[Any]:
-        DELAY = 0.3
+        DELAY = 0.1
         enriched_conversations = []
         conversations = self.get_all_conversations(start_time, end_time)
 
@@ -92,6 +119,7 @@ class ConversationsAPI:
             if conversation['state'] == 'resolved':
                 print("Getting messages...")
                 chat_log = self.get_messages(conversation['session_id'])
+                chat_log = ConversationUtils.sort_chat_messages(chat_log);
                 enriched_conversations.append(ConversationUtils.enrich_conversation(conversation, chat_log))
                 time.sleep(DELAY)
 
