@@ -1,9 +1,39 @@
 from typing import Any, Dict
-
 ONE_SECOND = 6000
 
 
 class ConversationUtils:
+    @staticmethod
+    def remove_outliers(data):
+        if not data:
+            return data
+
+        response_times = [item['avg_response_time'] for item in data]
+
+        sorted_times = sorted(response_times)
+
+        def calculate_quartile(data, q):
+            pos = (len(data) - 1) * q
+            lower = int(pos)
+            upper = lower + 1
+            weight = pos - lower
+            if upper < len(data):
+                return data[lower] * (1 - weight) + data[upper] * weight
+            else:
+                return data[lower]
+
+        Q1 = calculate_quartile(sorted_times, 0.25)
+        Q3 = calculate_quartile(sorted_times, 0.75)
+
+        IQR = Q3 - Q1
+
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        filtered_data = [item for item in data if lower_bound <= item['avg_response_time'] <= upper_bound]
+
+        return filtered_data
+
     @staticmethod
     def get_average_response_time(chat_log) -> Any:
         user_message = None
@@ -42,9 +72,8 @@ class ConversationUtils:
                 if 'state:resolved' in message['content']['namespace']:
                     reset()
 
-        avg = (delay_summation / count)if count > 0 else 0
-
-        return round(float(avg / ONE_SECOND), 2)
+        avg = delay_summation / count if count > 0 else 0
+        return avg / ONE_SECOND
 
     @staticmethod
     def get_first_timestamp(partial_log) -> Any:

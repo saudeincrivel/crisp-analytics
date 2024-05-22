@@ -1,4 +1,5 @@
 from fileUtils.fileUtils import FileUtils
+from conversationUtils.conversationUtils import ConversationUtils
 from dateUtils.dateUtils import convert_to_iso
 from conversations.conversations import ConversationsAPI
 import logging
@@ -20,12 +21,13 @@ logging.basicConfig(
 )
 
 
-
 def run_script():
     print("Running program..")
     api = ConversationsAPI()
     data = api.get_enriched_conversations()
-    FileUtils.save_to_disk(data)
+    filtered_data = ConversationUtils.remove_outliers(data)
+    FileUtils.save_to_disk(filtered_data)
+
     print("Finished!")
     return data
 
@@ -43,5 +45,5 @@ if __name__ == '__main__':
     # start_time = '20/04/2024'
     # end_time = '20/05/2024'
     # run_script_with_filter(start_time, end_time)
-    
+
     run_script()
